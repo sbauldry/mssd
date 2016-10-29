@@ -59,3 +59,38 @@ nlcom _b[Depress:ssparent]*_b[ssparent:m3]
 nlcom _b[Depress:ssfriend]*_b[ssfriend:m3]
 nlcom _b[Depress:ssadult]*_b[ssadult:m3]
 nlcom _b[Depress:ssteacher]*_b[ssteacher:m3]
+
+
+*** program to bootstrap indirect effects
+capture progrom drop BSI
+program BSI, rclass
+	svy: sem (Depress -> depress blues happy sad life)                     ///
+	     (age female r2-r4 f2-f5 p2-p5 lninc m2 m3 -> ss*)                 ///
+	     (age female r2-r4 f2-f5 p2-p5 lninc m2 m3 ss* -> Depress),        ///
+	     method(mlmv) cov(e.ssadult*e.ssparent e.ssparent*e.ssteacher      ///
+		 e.ssteacher*e.ssfriend e.ssadult*e.ssteacher e.ssadult*e.ssfriend ///
+		 e.ssparent*e.ssfriend)
+	estat teffects
+	mat bi = r(indirect)
+	
+	nlcom _b[Depress:ssparent]*_b[ssparent:m3]
+	mat b1 = r(b)
+	nlcom _b[Depress:ssfriend]*_b[ssfriend:m3]
+	mat b2 = r(b)
+	nlcom _b[Depress:ssadult]*_b[ssadult:m3]
+	mat b3 = r(b)
+	nlcom _b[Depress:ssteacher]*_b[ssteacher:m3]
+	mat b4 = r(b)
+	
+	return scalar bi1 = bi[1,67]
+	return scalar bi2 = bi[1,68]
+	return scalar b1  = b1[1,1]
+	return scalar b2  = b2[1,1]
+	return scalar b3  = b3[1,1]
+	return scalar b4  = b4[1,1]
+end
+
+set seed 13571113
+bootstrap r(bi1) r(bi2) r(b1) r(b2) r(b3) r(b4), reps(500): BSI
+
+
