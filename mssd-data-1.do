@@ -86,9 +86,12 @@ lab def m 0 "never" 1 "move age < 13" 2 "move age 13+"
 lab val moved m
 lab var moved "w1 moved"
 
+rename h1gi3 agmov
+lab var agmov "w1 age moved"
+
 rename (h1pr1 h1pr2 h1pr3 h1pr4) (ssadult ssparent ssteacher ssfriend)
 
-keep aid age female race famstr paredu lninc moved ss*
+keep aid age female race famstr paredu lninc moved agmov ss*
 tempfile wv1
 save `wv1', replace
 
