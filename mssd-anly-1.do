@@ -94,3 +94,26 @@ set seed 13571113
 bootstrap r(bi1) r(bi2) r(b1) r(b2) r(b3) r(b4), reps(500): BSI
 
 
+*** Do more recent moves have stronger relationships social support
+gen ymv = age - agmov
+table move, c(mean ymv)
+svy: mean ymv
+
+svy: sem (Depress -> depress blues happy sad life)                         ///
+	     (age female r2-r4 f2-f5 p2-p5 lninc ymv -> ss*)                   ///
+	     (age female r2-r4 f2-f5 p2-p5 lninc ymv ss* -> Depress),          ///
+	     method(mlmv) cov(e.ssadult*e.ssparent e.ssparent*e.ssteacher      ///
+		 e.ssteacher*e.ssfriend e.ssadult*e.ssteacher e.ssadult*e.ssfriend ///
+		 e.ssparent*e.ssfriend)
+		 
+* setting indicator for not moving and years since moved to 0
+replace ymv = 0 if move == 0
+gen nmv = (move == 0) if !mi(move)
+
+svy: sem (Depress -> depress blues happy sad life)                         ///
+	     (age female r2-r4 f2-f5 p2-p5 lninc nmv ymv -> ss*)               ///
+	     (age female r2-r4 f2-f5 p2-p5 lninc nmv ymv ss* -> Depress),      ///
+	     method(mlmv) cov(e.ssadult*e.ssparent e.ssparent*e.ssteacher      ///
+		 e.ssteacher*e.ssfriend e.ssadult*e.ssteacher e.ssadult*e.ssfriend ///
+		 e.ssparent*e.ssfriend)
+
