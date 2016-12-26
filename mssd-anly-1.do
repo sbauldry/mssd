@@ -1,6 +1,6 @@
 *** Purpose: to conduct mssd analysis
 *** Author: S Bauldry
-*** Date: April 11, 2016
+*** Date: December 26, 2016
 
 *** load and survey set the data
 use mssd-data-1
@@ -90,9 +90,10 @@ program BSI, rclass
 	return scalar b4  = b4[1,1]
 end
 
+log using "mssd-bs.txt", replace text
 set seed 13571113
 bootstrap r(bi1) r(bi2) r(b1) r(b2) r(b3) r(b4), reps(500): BSI
-
+log close
 
 *** Do more recent moves have stronger relationships social support
 gen ymv = age - agmov
