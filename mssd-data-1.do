@@ -1,6 +1,6 @@
 *** Purpose: to prepare data for mssd
 *** Author: S Bauldry
-*** Date: April 1, 2016
+*** Date: August 20, 2017
 
 *** paths to data
 global w1 "[path to data]"
@@ -10,7 +10,7 @@ global wt "[path to data]"
 *** extracting wave 1 data
 use aid imonth iday iyear h1gi1m h1gi1y bio_sex h1gi4 h1gi5c h1gi6a-h1gi6e ///
   pa12 pb8 h1rm1 h1rf1 pa55 h1gi3 h1pr1-h1pr4 h1hr3* h1hr6* h1nf1 h1nm1    ///
-  using "$w1", replace
+  h1fs3 h1fs6 h1fs11 h1fs16 h1fs19 using "$w1", replace
 
 *** setting missing data
 recode h1gi1m h1gi1y (96 = .)
@@ -20,6 +20,7 @@ recode pa55 (9996 = .)
 recode h1gi3 (96 98 99 = .)
 recode h1pr1-h1pr4 (6 96 98 99 = .)
 recode h1hr3* h1hr6* (96 97 98 99 = .)
+recode h1fs* (6 8 = .)
 
 *** preparing variables
 recode iyear (94 = 1994) (95 = 1995)
@@ -81,27 +82,37 @@ lab var paredu "w1 parent education"
 gen lninc = log(pa55 + 1)
 lab var lninc "w1 parent income (logged)"
 
-recode h1gi3 (0 = 0) (1/12 = 1) (13/19 = 2), gen(moved)
+rename h1gi3 w1agm
+recode w1agm (0 = 0) (1/12 = 1) (13/19 = 2), gen(w1mov)
 lab def m 0 "never" 1 "move age < 13" 2 "move age 13+"
-lab val moved m
-lab var moved "w1 moved"
+lab val w1mov m
+lab var w1mov "w1 moved"
 
-rename h1gi3 agmov
-lab var agmov "w1 age moved"
+rename (h1pr1 h1pr2 h1pr3 h1pr4) (w1adl w1tch w1par w1frd)
 
-rename (h1pr1 h1pr2 h1pr3 h1pr4) (ssadult ssparent ssteacher ssfriend)
+rename (h1fs3 h1fs6 h1fs11 h1fs16 h1fs19) (w1blu w1dep w1hap w1sad w1lfe)
+alpha w1blu w1dep w1hap w1sad w1lfe, gen(w1dps)
 
-keep aid age female race famstr paredu lninc moved agmov ss*
+keep aid age female race famstr paredu lninc w1agm w1mov w1adl w1tch w1par ///
+  w1frd w1blu w1dep w1hap w1sad w1lfe w1dps
 tempfile wv1
 save `wv1', replace
 
 
 *** extracting wave 2 data
-use aid h2fs3 h2fs6 h2fs11 h2fs16 h2fs19 using "$w2", replace
+use aid h2fs3 h2fs6 h2fs11 h2fs16 h2fs19 h2nb8 h2pr1 h2pr2 h2pr3 h2pr4 ///
+  using "$w2", replace
 
-recode h2fs* (6 8 = .)
+recode h2fs* h2nb8 (6 8 = .)
+recode h2pr1-h2pr4 (6 96 98 = .)
 
-rename (h2fs3 h2fs6 h2fs11 h2fs16 h2fs19) (blues depress happy sad life)
+rename (h2pr1 h2pr2 h2pr3 h2pr4) (w2adl w2tch w2par w2frd)
+
+rename (h2fs3 h2fs6 h2fs11 h2fs16 h2fs19) (w2blu w2dep w2hap w2sad w2lfe)
+alpha w2blu w2dep w2hap w2sad w2lfe, gen(w2dps)
+
+gen w2mov = (h2nb8 == 0) if !mi(h2nb8)
+drop h2nb8
 
 tempfile wv2
 save `wv2', replace
